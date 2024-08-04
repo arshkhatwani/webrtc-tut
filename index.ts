@@ -13,12 +13,16 @@ wss.on("connection", function connection(ws) {
 
         if (message.type === "sender") {
             senderSocket = ws;
+            console.log("Sender connected");
         } else if (message.type === "receiver") {
             receiverSocket = ws;
+            console.log("Receiver connected");
         } else if (message.type === "createOffer") {
             if (ws !== senderSocket) {
                 return;
             }
+
+            console.log("Offer created", message.sdp);
 
             receiverSocket?.send(
                 JSON.stringify({
@@ -31,6 +35,8 @@ wss.on("connection", function connection(ws) {
                 return;
             }
 
+            console.log("Answer created", message.sdp);
+
             senderSocket?.send(
                 JSON.stringify({
                     type: "createAnswer",
@@ -39,6 +45,8 @@ wss.on("connection", function connection(ws) {
             );
         } else if (message.type === "iceCandidate") {
             if (ws === senderSocket) {
+                console.log("Ice candidate from sender", message.candidate);
+
                 receiverSocket?.send(
                     JSON.stringify({
                         type: "iceCandidate",
@@ -46,6 +54,8 @@ wss.on("connection", function connection(ws) {
                     })
                 );
             } else if (ws === receiverSocket) {
+                console.log("Ice candidate from receiver", message.candidate);
+
                 senderSocket?.send(
                     JSON.stringify({
                         type: "iceCandidate",
